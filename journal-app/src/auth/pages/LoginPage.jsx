@@ -2,26 +2,36 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { Link as RouterLink } from "react-router-dom";
 import { Google } from "@mui/icons-material";
-import { Button, Grid, Link, TextField, Typography } from "@mui/material";
+import {
+  Button,
+  Grid,
+  Link,
+  TextField,
+  Alert,
+  Typography,
+} from "@mui/material";
 import { AuthLayout } from "../layout/AuthLayout";
 import { useForm } from "../../hooks";
-import { checkingAuthentication, startGoogleSignIn } from "../../store/auth";
+import {
+  startGoogleSignIn,
+  startLoginWithEmailPassword,
+} from "../../store/auth";
 import { useMemo } from "react";
 export const LoginPage = () => {
   const dispatch = useDispatch();
-  const { status } = useSelector((state) => state.auth);
+  const { status, errorMessage } = useSelector((state) => state.auth);
 
   const { email, password, onInputChange } = useForm({
-    email: "sebas@sebas.com",
-    password: "sebas123",
+    email: "",
+    password: "",
   });
 
-  const isAuthtentcated = useMemo(() => status === "checking", [status]);
+  const isAuthtenticated = useMemo(() => status === "checking", [status]);
 
   const onSubmint = (e) => {
     e.preventDefault();
 
-    dispatch(checkingAuthentication());
+    dispatch(startLoginWithEmailPassword({ email, password }));
   };
 
   const onGoogleSignIn = () => {
@@ -31,7 +41,7 @@ export const LoginPage = () => {
 
   return (
     <AuthLayout title="Login">
-      <form onSubmit={onSubmint}>
+      <form onSubmit={onSubmint} className="animate__animated animate__fadeIn animate__faster">
         <Grid container>
           <Grid item xs={12}>
             <TextField
@@ -58,10 +68,18 @@ export const LoginPage = () => {
           </Grid>
         </Grid>
 
+        <Grid container
+          sx={{ mt: 2, mb: 2}}
+        >
+          <Grid item xs={12} display={errorMessage ? "block" : "none"}>
+            <Alert severity="error">{errorMessage}</Alert>
+          </Grid>
+        </Grid>
+
         <Grid container spacing={2} sx={{ mb: 2 }}>
           <Grid item xs={12} sm={6}>
             <Button
-              disabled={isAuthtentcated}
+              disabled={isAuthtenticated}
               variant="contained"
               sx={{ mt: 2 }}
               fullWidth
@@ -72,7 +90,7 @@ export const LoginPage = () => {
           </Grid>
           <Grid item xs={12} sm={6}>
             <Button
-              disabled={isAuthtentcated}
+              disabled={isAuthtenticated}
               variant="contained"
               sx={{ mt: 2 }}
               fullWidth
